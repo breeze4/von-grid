@@ -3,24 +3,32 @@
 
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
  */
-vg.Board = function(grid, finderConfig) {
+import {
+	Object3D, LineBasicMaterial
+} from 'three';
+
+import AStarFinder from '../pathing/AStarFinder';
+import Loader from '../utils/Loader';
+import Tools from '../utils/Tools';
+
+const Board = function(grid, finderConfig) {
 	if (!grid) throw new Error('You must pass in a grid system for the board to use.');
 
 	this.tiles = [];
 	this.tileGroup = null; // only for tiles
 
-	this.group = new THREE.Object3D(); // can hold all entities, also holds tileGroup, never trashed
+	this.group = new Object3D(); // can hold all entities, also holds tileGroup, never trashed
 
 	this.grid = null;
 	this.overlay = null;
-	this.finder = new vg.AStarFinder(finderConfig);
+	this.finder = new AStarFinder(finderConfig);
 	// need to keep a resource cache around, so this Loader does that, use it instead of THREE.ImageUtils
-	vg.Loader.init();
+	Loader.init();
 
 	this.setGrid(grid);
 };
 
-vg.Board.prototype = {
+Board.prototype = {
 	setEntityOnTile: function(entity, tile) {
 		// snap an entity's position to a tile; merely copies position
 		var pos = this.grid.cellToPixel(tile.cell);
@@ -91,7 +99,7 @@ vg.Board.prototype = {
 	},
 
 	getRandomTile: function() {
-		var i = vg.Tools.randomInt(0, this.tiles.length-1);
+		var i = Tools.randomInt(0, this.tiles.length-1);
 		return this.tiles[i];
 	},
 
@@ -111,12 +119,12 @@ vg.Board.prototype = {
 		}
 		this.grid = newGrid;
 		this.tiles = [];
-		this.tileGroup = new THREE.Object3D();
+		this.tileGroup = new Object3D();
 		this.group.add(this.tileGroup);
 	},
 
 	generateOverlay: function(size) {
-		var mat = new THREE.LineBasicMaterial({
+		var mat = new LineBasicMaterial({
 			color: 0x000000,
 			opacity: 0.3
 		});
@@ -125,7 +133,7 @@ vg.Board.prototype = {
 			this.group.remove(this.overlay);
 		}
 
-		this.overlay = new THREE.Object3D();
+		this.overlay = new Object3D();
 
 		this.grid.generateOverlay(size, this.overlay, mat);
 
@@ -138,7 +146,7 @@ vg.Board.prototype = {
 		var tiles = this.grid.generateTiles(config);
 		this.tiles = tiles;
 
-		this.tileGroup = new THREE.Object3D();
+		this.tileGroup = new Object3D();
 		for (var i = 0; i < tiles.length; i++) {
 			this.tileGroup.add(tiles[i].mesh);
 		}
@@ -153,4 +161,4 @@ vg.Board.prototype = {
 	}
 };
 
-vg.Board.prototype.constructor = vg.Board;
+Board.prototype.constructor = Board;

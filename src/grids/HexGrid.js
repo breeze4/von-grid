@@ -16,12 +16,23 @@
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
  */
 // 'utils/Loader', 'graphs/Hex', 'utils/Tools'
-vg.HexGrid = function(config) {
+import {
+	Shape, Geometry, ShapeGeometry, Vector3, ExtrudeGeometry, MeshPhongMaterial,
+	MeshBasicMaterial, Mesh, Line
+} from 'three';
+
+import { PI, HEX, SQRT3, DEG_TO_RAD, TAU } from '../constants';
+import Tools from '../utils/Tools';
+
+import Cell from './Cell';
+import Tile from './Tile';
+
+const HexGrid = function (config) {
 	config = config || {};
 	/*  ______________________________________________
 		GRID INTERFACE:
 	*/
-	this.type = vg.HEX;
+	this.type = HEX;
 	this.size = 5; // only used for generated maps
 	this.cellSize = typeof config.cellSize === 'undefined' ? 10 : config.cellSize;
 	this.cells = {};
@@ -37,7 +48,7 @@ vg.HexGrid = function(config) {
 		verts.push(this._createVertex(i));
 	}
 	// copy the verts into a shape for the geometry to use
-	this.cellShape = new THREE.Shape();
+	this.cellShape = new Shape();
 	this.cellShape.moveTo(verts[0].x, verts[0].y);
 	for (i = 1; i < 6; i++) {
 		this.cellShape.lineTo(verts[i].x, verts[i].y);
@@ -45,66 +56,66 @@ vg.HexGrid = function(config) {
 	this.cellShape.lineTo(verts[0].x, verts[0].y);
 	this.cellShape.autoClose = true;
 
-	this.cellGeo = new THREE.Geometry();
+	this.cellGeo = new Geometry();
 	this.cellGeo.vertices = verts;
 	this.cellGeo.verticesNeedUpdate = true;
 
-	this.cellShapeGeo = new THREE.ShapeGeometry(this.cellShape);
+	this.cellShapeGeo = new ShapeGeometry(this.cellShape);
 
 	/*  ______________________________________________
 		PRIVATE
 	*/
 
 	this._cellWidth = this.cellSize * 2;
-	this._cellLength = (vg.SQRT3 * 0.5) * this._cellWidth;
+	this._cellLength = (SQRT3 * 0.5) * this._cellWidth;
 	this._hashDelimeter = '.';
 	// pre-computed permutations
-	this._directions = [new vg.Cell(+1, -1, 0), new vg.Cell(+1, 0, -1), new vg.Cell(0, +1, -1),
-						new vg.Cell(-1, +1, 0), new vg.Cell(-1, 0, +1), new vg.Cell(0, -1, +1)];
-	this._diagonals = [new vg.Cell(+2, -1, -1), new vg.Cell(+1, +1, -2), new vg.Cell(-1, +2, -1),
-					   new vg.Cell(-2, +1, +1), new vg.Cell(-1, -1, +2), new vg.Cell(+1, -2, +1)];
+	this._directions = [new Cell(+1, -1, 0), new Cell(+1, 0, -1), new Cell(0, +1, -1),
+	new Cell(-1, +1, 0), new Cell(-1, 0, +1), new Cell(0, -1, +1)];
+	this._diagonals = [new Cell(+2, -1, -1), new Cell(+1, +1, -2), new Cell(-1, +2, -1),
+	new Cell(-2, +1, +1), new Cell(-1, -1, +2), new Cell(+1, -2, +1)];
 	// cached objects
 	this._list = [];
-	this._vec3 = new THREE.Vector3();
-	this._cel = new vg.Cell();
-	this._conversionVec = new THREE.Vector3();
+	this._vec3 = new Vector3();
+	this._cel = new Cell();
+	this._conversionVec = new Vector3();
 	this._geoCache = [];
 	this._matCache = [];
 };
 
-vg.HexGrid.TWO_THIRDS = 2 / 3;
+HexGrid.TWO_THIRDS = 2 / 3;
 
-vg.HexGrid.prototype = {
+HexGrid.prototype = {
 	/*  ________________________________________________________________________
 		High-level functions that the Board interfaces with (all grids implement)
 	 */
 
 	// grid cell (Hex in cube coordinate space) to position in pixels/world
-	cellToPixel: function(cell) {
+	cellToPixel: function (cell) {
 		this._vec3.x = cell.q * this._cellWidth * 0.75;
 		this._vec3.y = cell.h;
 		this._vec3.z = -((cell.s - cell.r) * this._cellLength * 0.5);
 		return this._vec3;
 	},
 
-	pixelToCell: function(pos) {
+	pixelToCell: function (pos) {
 		// convert a position in world space ("pixels") to cell coordinates
-		var q = pos.x * (vg.HexGrid.TWO_THIRDS / this.cellSize);
-		var r = ((-pos.x / 3) + (vg.SQRT3/3) * pos.z) / this.cellSize;
-		this._cel.set(q, r, -q-r);
+		var q = pos.x * (HexGrid.TWO_THIRDS / this.cellSize);
+		var r = ((-pos.x / 3) + (SQRT3 / 3) * pos.z) / this.cellSize;
+		this._cel.set(q, r, -q - r);
 		return this._cubeRound(this._cel);
 	},
 
-	getCellAt: function(pos) {
+	getCellAt: function (pos) {
 		// get the Cell (if any) at the passed world position
-		var q = pos.x * (vg.HexGrid.TWO_THIRDS / this.cellSize);
-		var r = ((-pos.x / 3) + (vg.SQRT3/3) * pos.z) / this.cellSize;
-		this._cel.set(q, r, -q-r);
+		var q = pos.x * (HexGrid.TWO_THIRDS / this.cellSize);
+		var r = ((-pos.x / 3) + (SQRT3 / 3) * pos.z) / this.cellSize;
+		this._cel.set(q, r, -q - r);
 		this._cubeRound(this._cel);
 		return this.cells[this.cellToHash(this._cel)];
 	},
 
-	getNeighbors: function(cell, diagonal, filter) {
+	getNeighbors: function (cell, diagonal, filter) {
 		// always returns an array
 		var i, n, l = this._directions.length;
 		this._list.length = 0;
@@ -131,8 +142,8 @@ vg.HexGrid.prototype = {
 		return this._list;
 	},
 
-	getRandomCell: function() {
-		var c, i = 0, x = vg.Tools.randomInt(0, this.numCells);
+	getRandomCell: function () {
+		var c, i = 0, x = Tools.randomInt(0, this.numCells);
 		for (c in this.cells) {
 			if (i === x) {
 				return this.cells[c];
@@ -142,17 +153,17 @@ vg.HexGrid.prototype = {
 		return this.cells[c];
 	},
 
-	cellToHash: function(cell) {
-		return cell.q+this._hashDelimeter+cell.r+this._hashDelimeter+cell.s;
+	cellToHash: function (cell) {
+		return cell.q + this._hashDelimeter + cell.r + this._hashDelimeter + cell.s;
 	},
 
-	distance: function(cellA, cellB) {
+	distance: function (cellA, cellB) {
 		var d = Math.max(Math.abs(cellA.q - cellB.q), Math.abs(cellA.r - cellB.r), Math.abs(cellA.s - cellB.s));
 		d += cellB.h - cellA.h; // include vertical height
 		return d;
 	},
 
-	clearPath: function() {
+	clearPath: function () {
 		var i, c;
 		for (i in this.cells) {
 			c = this.cells[i];
@@ -163,21 +174,21 @@ vg.HexGrid.prototype = {
 		}
 	},
 
-	traverse: function(cb) {
+	traverse: function (cb) {
 		var i;
 		for (i in this.cells) {
 			cb(this.cells[i]);
 		}
 	},
 
-	generateTile: function(cell, scale, material) {
+	generateTile: function (cell, scale, material) {
 		var height = Math.abs(cell.h);
 		if (height < 1) height = 1;
 
 		var geo = this._geoCache[height];
 		if (!geo) {
 			this.extrudeSettings.amount = height;
-			geo = new THREE.ExtrudeGeometry(this.cellShape, this.extrudeSettings);
+			geo = new ExtrudeGeometry(this.cellShape, this.extrudeSettings);
 			this._geoCache[height] = geo;
 		}
 
@@ -189,7 +200,7 @@ vg.HexGrid.prototype = {
 			this._matCache[c.matConfig.mat_cache_id] = mat;
 		}*/
 
-		var tile = new vg.Tile({
+		var tile = new Tile({
 			size: this.cellSize,
 			scale: scale,
 			cell: cell,
@@ -202,7 +213,7 @@ vg.HexGrid.prototype = {
 		return tile;
 	},
 
-	generateTiles: function(config) {
+	generateTiles: function (config) {
 		config = config || {};
 		var tiles = [];
 		var settings = {
@@ -218,18 +229,18 @@ vg.HexGrid.prototype = {
 				bevelThickness: 0.5
 			}
 		}
-		settings = vg.Tools.merge(settings, config);
+		settings = Tools.merge(settings, config);
 
 		/*if (!settings.material) {
-			settings.material = new THREE.MeshPhongMaterial({
-				color: vg.Tools.randomizeRGB('30, 30, 30', 10)
+			settings.material = new MeshPhongMaterial({
+				color: Tools.randomizeRGB('30, 30, 30', 10)
 			});
 		}*/
 
 		// overwrite with any new dimensions
 		this.cellSize = settings.cellSize;
 		this._cellWidth = this.cellSize * 2;
-		this._cellLength = (vg.SQRT3 * 0.5) * this._cellWidth;
+		this._cellLength = (SQRT3 * 0.5) * this._cellWidth;
 
 		this.autogenerated = true;
 		this.extrudeSettings = settings.extrudeSettings;
@@ -245,50 +256,50 @@ vg.HexGrid.prototype = {
 		return tiles;
 	},
 
-	generateTilePoly: function(material) {
+	generateTilePoly: function (material) {
 		if (!material) {
-			material = new THREE.MeshBasicMaterial({color: 0x24b4ff});
+			material = new MeshBasicMaterial({ color: 0x24b4ff });
 		}
-		var mesh = new THREE.Mesh(this.cellShapeGeo, material);
+		var mesh = new Mesh(this.cellShapeGeo, material);
 		this._vec3.set(1, 0, 0);
-		mesh.rotateOnAxis(this._vec3, vg.PI/2);
+		mesh.rotateOnAxis(this._vec3, PI / 2);
 		return mesh;
 	},
 
 	// create a flat, hexagon-shaped grid
-	generate: function(config) {
+	generate: function (config) {
 		config = config || {};
 		this.size = typeof config.size === 'undefined' ? this.size : config.size;
 		var x, y, z, c;
-		for (x = -this.size; x < this.size+1; x++) {
-			for (y = -this.size; y < this.size+1; y++) {
-				z = -x-y;
+		for (x = -this.size; x < this.size + 1; x++) {
+			for (y = -this.size; y < this.size + 1; y++) {
+				z = -x - y;
 				if (Math.abs(x) <= this.size && Math.abs(y) <= this.size && Math.abs(z) <= this.size) {
-					c = new vg.Cell(x, y, z);
+					c = new Cell(x, y, z);
 					this.add(c);
 				}
 			}
 		}
 	},
 
-	generateOverlay: function(size, overlayObj, overlayMat) {
+	generateOverlay: function (size, overlayObj, overlayMat) {
 		var x, y, z;
 		var geo = this.cellShape.createPointsGeometry();
-		for (x = -size; x < size+1; x++) {
-			for (y = -size; y < size+1; y++) {
-				z = -x-y;
+		for (x = -size; x < size + 1; x++) {
+			for (y = -size; y < size + 1; y++) {
+				z = -x - y;
 				if (Math.abs(x) <= size && Math.abs(y) <= size && Math.abs(z) <= size) {
 					this._cel.set(x, y, z); // define the cell
-					var line = new THREE.Line(geo, overlayMat);
+					var line = new Line(geo, overlayMat);
 					line.position.copy(this.cellToPixel(this._cel));
-					line.rotation.x = 90 * vg.DEG_TO_RAD;
+					line.rotation.x = 90 * DEG_TO_RAD;
 					overlayObj.add(line);
 				}
 			}
 		}
 	},
 
-	add: function(cell) {
+	add: function (cell) {
 		var h = this.cellToHash(cell);
 		if (this.cells[h]) {
 			// console.warn('A cell already exists there');
@@ -300,7 +311,7 @@ vg.HexGrid.prototype = {
 		return cell;
 	},
 
-	remove: function(cell) {
+	remove: function (cell) {
 		var h = this.cellToHash(cell);
 		if (this.cells[h]) {
 			delete this.cells[h];
@@ -308,7 +319,7 @@ vg.HexGrid.prototype = {
 		}
 	},
 
-	dispose: function() {
+	dispose: function () {
 		this.cells = null;
 		this.numCells = 0;
 		this.cellShape = null;
@@ -345,11 +356,11 @@ vg.HexGrid.prototype = {
 			]
 		}
 	*/
-	load: function(url, cb, scope) {
+	load: function (url, cb, scope) {
 		var self = this;
-		vg.Tools.getJSON({
+		Tools.getJSON({
 			url: url,
-			callback: function(json) {
+			callback: function (json) {
 				self.fromJSON(json);
 				cb.call(scope || null, json);
 			},
@@ -358,7 +369,7 @@ vg.HexGrid.prototype = {
 		});
 	},
 
-	fromJSON: function(json) {
+	fromJSON: function (json) {
 		var i, c;
 		var cells = json.cells;
 
@@ -368,19 +379,19 @@ vg.HexGrid.prototype = {
 		this.size = json.size;
 		this.cellSize = json.cellSize;
 		this._cellWidth = this.cellSize * 2;
-		this._cellLength = (vg.SQRT3 * 0.5) * this._cellWidth;
+		this._cellLength = (SQRT3 * 0.5) * this._cellWidth;
 
 		this.extrudeSettings = json.extrudeSettings;
 		this.autogenerated = json.autogenerated;
 
 		for (i = 0; i < cells.length; i++) {
-			c = new vg.Cell();
+			c = new Cell();
 			c.copy(cells[i]);
 			this.add(c);
 		}
 	},
 
-	toJSON: function() {
+	toJSON: function () {
 		var json = {
 			size: this.size,
 			cellSize: this.cellSize,
@@ -412,15 +423,15 @@ vg.HexGrid.prototype = {
 		They're still here for reference.
 	 */
 
-	_createVertex: function(i) {
-		var angle = (vg.TAU / 6) * i;
-		return new THREE.Vector3((this.cellSize * Math.cos(angle)), (this.cellSize * Math.sin(angle)), 0);
+	_createVertex: function (i) {
+		var angle = (TAU / 6) * i;
+		return new Vector3((this.cellSize * Math.cos(angle)), (this.cellSize * Math.sin(angle)), 0);
 	},
 
 	/*_pixelToAxial: function(pos) {
 		var q, r; // = x, y
 		q = pos.x * ((2/3) / this.cellSize);
-		r = ((-pos.x / 3) + (vg.SQRT3/3) * pos.y) / this.cellSize;
+		r = ((-pos.x / 3) + (SQRT3/3) * pos.y) / this.cellSize;
 		this._cel.set(q, r, -q-r);
 		return this._cubeRound(this._cel);
 	},*/
@@ -447,7 +458,7 @@ vg.HexGrid.prototype = {
 	/*_hexToPixel: function(h) {
 		var x, y; // = q, r
 		x = this.cellSize * 1.5 * h.x;
-		y = this.cellSize * vg.SQRT3 * (h.y + (h.x * 0.5));
+		y = this.cellSize * SQRT3 * (h.y + (h.x * 0.5));
 		return {x: x, y: y};
 	},*/
 
@@ -455,7 +466,7 @@ vg.HexGrid.prototype = {
 		return this._cubeRound(this.axialToCube(h));
 	},*/
 
-	_cubeRound: function(h) {
+	_cubeRound: function (h) {
 		var rx = Math.round(h.q);
 		var ry = Math.round(h.r);
 		var rz = Math.round(h.s);
@@ -465,13 +476,13 @@ vg.HexGrid.prototype = {
 		var zDiff = Math.abs(rz - h.s);
 
 		if (xDiff > yDiff && xDiff > zDiff) {
-			rx = -ry-rz;
+			rx = -ry - rz;
 		}
 		else if (yDiff > zDiff) {
-			ry = -rx-rz;
+			ry = -rx - rz;
 		}
 		else {
-			rz = -rx-ry;
+			rz = -rx - ry;
 		}
 
 		return this._cel.set(rx, ry, rz);
@@ -482,4 +493,4 @@ vg.HexGrid.prototype = {
 	}*/
 };
 
-vg.HexGrid.prototype.constructor = vg.HexGrid;
+HexGrid.prototype.constructor = HexGrid;

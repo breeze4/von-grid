@@ -1,14 +1,14 @@
 /*
 	@source https://github.com/qiao/PathFinding.js/
 */
-vg.PathUtil = {
+const PathUtil = {
 	/**
 	 * Backtrace according to the parent records and return the path.
 	 * (including both start and end nodes)
 	 * @param {Node} node End node
 	 * @return {Array.<Array.<number>>} the path
 	 */
-	backtrace: function(node) {
+	backtrace: function (node) {
 		var path = [node];
 		while (node._parent) {
 			node = node._parent;
@@ -23,7 +23,7 @@ vg.PathUtil = {
 	 * @param {Node}
 	 * @param {Node}
 	 */
-	biBacktrace: function(nodeA, nodeB) {
+	biBacktrace: function (nodeA, nodeB) {
 		var pathA = this.backtrace(nodeA),
 			pathB = this.backtrace(nodeB);
 		return pathA.concat(pathB.reverse());
@@ -34,7 +34,7 @@ vg.PathUtil = {
 	 * @param {Array.<Array.<number>>} path The path
 	 * @return {number} The length of the path
 	 */
-	pathLength: function(path) {
+	pathLength: function (path) {
 		var i, sum = 0, a, b, dx, dy;
 		for (i = 1; i < path.length; ++i) {
 			a = path[i - 1];
@@ -57,7 +57,7 @@ vg.PathUtil = {
 	 * @param {number} y1 End y coordinate
 	 * @return {Array.<Array.<number>>} The coordinates on the line
 	 */
-	interpolate: function(x0, y0, x1, y1) {
+	interpolate: function (x0, y0, x1, y1) {
 		var abs = Math.abs,
 			line = [],
 			sx, sy, dx, dy, err, e2;
@@ -94,7 +94,7 @@ vg.PathUtil = {
 	 * @param {Array.<Array.<number>>} path The path
 	 * @return {Array.<Array.<number>>} expanded path
 	 */
-	expandPath: function(path) {
+	expandPath: function (path) {
 		var expanded = [],
 			len = path.length,
 			coord0, coord1,
@@ -128,7 +128,7 @@ vg.PathUtil = {
 	 * @param {PF.Grid} grid
 	 * @param {Array.<Array.<number>>} path The path
 	 */
-	smoothenPath: function(grid, path) {
+	smoothenPath: function (grid, path) {
 		var len = path.length,
 			x0 = path[0][0],        // path start x
 			y0 = path[0][1],        // path start y
@@ -178,7 +178,7 @@ vg.PathUtil = {
 	 * @param {Array.<Array.<number>>} path The path
 	 * @return {Array.<Array.<number>>} The compressed path
 	 */
-	compressPath: function(path) {
+	compressPath: function (path) {
 
 		// nothing to compress
 		if (path.length < 3) {
@@ -197,12 +197,12 @@ vg.PathUtil = {
 			sq, i;
 
 		// normalize the direction
-		sq = Math.sqrt(dx*dx + dy*dy);
+		sq = Math.sqrt(dx * dx + dy * dy);
 		dx /= sq;
 		dy /= sq;
 
 		// start the new path
-		compressed.push([sx,sy]);
+		compressed.push([sx, sy]);
 
 		for (i = 2; i < path.length; i++) {
 
@@ -223,19 +223,21 @@ vg.PathUtil = {
 			dy = py - ly;
 
 			// normalize
-			sq = Math.sqrt(dx*dx + dy*dy);
+			sq = Math.sqrt(dx * dx + dy * dy);
 			dx /= sq;
 			dy /= sq;
 
 			// if the direction has changed, store the point
 			if (dx !== ldx || dy !== ldy) {
-				compressed.push([lx,ly]);
+				compressed.push([lx, ly]);
 			}
 		}
 
 		// store the last point
-		compressed.push([px,py]);
+		compressed.push([px, py]);
 
 		return compressed;
 	}
 };
+
+export default PathUtil;

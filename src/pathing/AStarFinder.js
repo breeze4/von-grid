@@ -3,27 +3,34 @@
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
  */
 // 'utils/Tools', 'lib/LinkedList'
-vg.AStarFinder = function(finderConfig) {
+
+import Tools from '../utils/Tools';
+
+import LinkedList from '../lib/LinkedList';
+
+import PathUtil from './PathUtil';
+
+const AStarFinder = function (finderConfig) {
 	finderConfig = finderConfig || {};
 
 	var settings = {
 		allowDiagonal: false,
 		heuristicFilter: null
 	};
-	settings = vg.Tools.merge(settings, finderConfig);
+	settings = Tools.merge(settings, finderConfig);
 
 	this.allowDiagonal = settings.allowDiagonal;
 	this.heuristicFilter = settings.heuristicFilter;
 
-	this.list = new vg.LinkedList();
+	this.list = new LinkedList();
 };
 
-vg.AStarFinder.prototype = {
+AStarFinder.prototype = {
 	/*
 		Find and return the path.
 		@return Array<Cell> The path, including both start and end positions. Null if it failed.
 	 */
-	findPath: function(startNode, endNode, heuristic, grid) {
+	findPath: function (startNode, endNode, heuristic, grid) {
 		var current, costSoFar, neighbors, n, i, l;
 		heuristic = heuristic || this.heuristicFilter;
 		// clear old values from previous finding
@@ -44,7 +51,7 @@ vg.AStarFinder.prototype = {
 
 			// if reached the end position, construct the path and return it
 			if (current === endNode) {
-				return vg.PathUtil.backtrace(endNode);
+				return PathUtil.backtrace(endNode);
 			}
 
 			// cycle through each neighbor of the current current
@@ -70,7 +77,7 @@ vg.AStarFinder.prototype = {
 
 					// check neighbor if it's the end current as well--often cuts steps by a significant amount
 					if (n === endNode) {
-						return vg.PathUtil.backtrace(endNode);
+						return PathUtil.backtrace(endNode);
 					}
 					// console.log(n);
 					this.list.add(n);
@@ -82,9 +89,11 @@ vg.AStarFinder.prototype = {
 		return null;
 	},
 
-	compare: function(nodeA, nodeB) {
+	compare: function (nodeA, nodeB) {
 		return nodeA._priority - nodeB._priority;
 	}
 };
 
-vg.AStarFinder.prototype.constructor = vg.AStarFinder;
+AStarFinder.prototype.constructor = AStarFinder;
+
+export default AStarFinder;

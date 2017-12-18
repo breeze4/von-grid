@@ -1,9 +1,12 @@
+import LinkedList from '../lib/LinkedList';
+
 /*
 	Simple structure for holding grid coordinates and extra data about them.
 
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
 */
-vg.Cell = function(q, r, s, h) {
+
+const Cell = function(q, r, s, h) {
 	this.q = q || 0; // x grid coordinate (using different letters so that it won't be confused with pixel/world coordinates)
 	this.r = r || 0; // y grid coordinate
 	this.s = s || 0; // z grid coordinate
@@ -16,10 +19,10 @@ vg.Cell = function(q, r, s, h) {
 	this._priority = 0;
 	this._visited = false;
 	this._parent = null;
-	this.uniqueID = vg.LinkedList.generateID();
+	this.uniqueID = LinkedList.generateID();
 };
 
-vg.Cell.prototype = {
+Cell.prototype = {
 	set: function(q, r, s) {
 		this.q = q;
 		this.r = r;
@@ -50,4 +53,6 @@ vg.Cell.prototype = {
 	}
 };
 
-vg.Cell.prototype.constructor = vg.Cell;
+Cell.prototype.constructor = Cell;
+
+export default Cell;

@@ -3,34 +3,38 @@
 
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
 */
-vg.Tile = function(config) {
+
+import { DEG_TO_RAD, TILE } from '../constants';
+import Tools from '../utils/Tools';
+
+const Tile = function (config) {
 	config = config || {};
 	var settings = {
-		cell: null, // required vg.Cell
+		cell: null, // required Cell
 		geometry: null, // required threejs geometry
 		material: null // not required but it would improve performance significantly
 	};
-	settings = vg.Tools.merge(settings, config);
+	settings = Tools.merge(settings, config);
 
 	if (!settings.cell || !settings.geometry) {
-		throw new Error('Missing vg.Tile configuration');
+		throw new Error('Missing Tile configuration');
 	}
 
 	this.cell = settings.cell;
 	if (this.cell.tile && this.cell.tile !== this) this.cell.tile.dispose(); // remove whatever was there
 	this.cell.tile = this;
 
-	this.uniqueID = vg.Tools.generateID();
+	this.uniqueID = Tools.generateID();
 
 	this.geometry = settings.geometry;
 	this.material = settings.material;
 	if (!this.material) {
 		this.material = new THREE.MeshPhongMaterial({
-			color: vg.Tools.randomizeRGB('30, 30, 30', 13)
+			color: Tools.randomizeRGB('30, 30, 30', 13)
 		});
 	}
 
-	this.objectType = vg.TILE;
+	this.objectType = TILE;
 	this.entity = null;
 	this.userData = {};
 
@@ -45,7 +49,7 @@ vg.Tile = function(config) {
 	this.rotation = this.mesh.rotation;
 
 	// rotate it to face "up" (the threejs coordinate space is Y+)
-	this.rotation.x = -90 * vg.DEG_TO_RAD;
+	this.rotation.x = -90 * DEG_TO_RAD;
 	this.mesh.scale.set(settings.scale, settings.scale, 1);
 
 	if (this.material.emissive) {
@@ -56,8 +60,8 @@ vg.Tile = function(config) {
 	}
 };
 
-vg.Tile.prototype = {
-	select: function() {
+Tile.prototype = {
+	select: function () {
 		if (this.material.emissive) {
 			this.material.emissive.setHex(this.highlight);
 		}
@@ -65,7 +69,7 @@ vg.Tile.prototype = {
 		return this;
 	},
 
-	deselect: function() {
+	deselect: function () {
 		if (this._emissive !== null && this.material.emissive) {
 			this.material.emissive.setHex(this._emissive);
 		}
@@ -73,7 +77,7 @@ vg.Tile.prototype = {
 		return this;
 	},
 
-	toggle: function() {
+	toggle: function () {
 		if (this.selected) {
 			this.deselect();
 		}
@@ -83,7 +87,7 @@ vg.Tile.prototype = {
 		return this;
 	},
 
-	dispose: function() {
+	dispose: function () {
 		if (this.cell && this.cell.tile) this.cell.tile = null;
 		this.cell = null;
 		this.position = null;
@@ -99,4 +103,6 @@ vg.Tile.prototype = {
 	}
 };
 
-vg.Tile.prototype.constructor = vg.Tile;
+Tile.prototype.constructor = Tile;
+
+export default Tile;
