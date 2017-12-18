@@ -9,7 +9,13 @@
 
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
  */
-vg.MouseCaster = function(group, camera, element) {
+import {
+	Vector2, Vector3, Raycaster
+} from 'three';
+
+import Signal from '../lib/Signal';
+
+const MouseCaster = function (group, camera, element) {
 	this.down = false; // left click
 	this.rightDown = false;
 	// the object that was just clicked on
@@ -26,14 +32,14 @@ vg.MouseCaster = function(group, camera, element) {
 	this.wheel = 0;
 
 	// you can track exactly where the mouse is in the 3D scene by using the z component
-	this.position = new THREE.Vector3();
-	this.screenPosition = new THREE.Vector2();
-	this.signal = new vg.Signal();
+	this.position = new Vector3();
+	this.screenPosition = new Vector2();
+	this.signal = new Signal();
 	this.group = group;
 
 	// behind-the-scenes stuff you shouldn't worry about
 	this._camera = camera;
-	this._raycaster = new THREE.Raycaster();
+	this._raycaster = new Raycaster();
 	this._preventDefault = false;
 
 	element = element || document;
@@ -46,15 +52,15 @@ vg.MouseCaster = function(group, camera, element) {
 };
 
 // statics to describe the events we dispatch
-vg.MouseCaster.OVER = 'over';
-vg.MouseCaster.OUT = 'out';
-vg.MouseCaster.DOWN = 'down';
-vg.MouseCaster.UP = 'up';
-vg.MouseCaster.CLICK = 'click'; // only fires if the user clicked down and up while on the same object
-vg.MouseCaster.WHEEL = 'wheel';
+MouseCaster.OVER = 'over';
+MouseCaster.OUT = 'out';
+MouseCaster.DOWN = 'down';
+MouseCaster.UP = 'up';
+MouseCaster.CLICK = 'click'; // only fires if the user clicked down and up while on the same object
+MouseCaster.WHEEL = 'wheel';
 
-vg.MouseCaster.prototype = {
-	update: function() {
+MouseCaster.prototype = {
+	update: function () {
 		if (!this.active) {
 			return;
 		}
@@ -72,7 +78,7 @@ vg.MouseCaster.prototype = {
 				// the first object changed, meaning there's a different one, or none at all
 				if (this.pickedObject) {
 					// it's a new object, notify the old object is going away
-					this.signal.dispatch(vg.MouseCaster.OUT, this.pickedObject);
+					this.signal.dispatch(MouseCaster.OUT, this.pickedObject);
 				}
 				/*else {
 					// hit a new object when nothing was there previously
@@ -80,7 +86,7 @@ vg.MouseCaster.prototype = {
 				this.pickedObject = obj;
 				this.selectedObject = null; // cancel click, otherwise it'll confuse the user
 
-				this.signal.dispatch(vg.MouseCaster.OVER, this.pickedObject);
+				this.signal.dispatch(MouseCaster.OVER, this.pickedObject);
 			}
 			this.position.copy(hit.point);
 			this.screenPosition.z = hit.distance;
@@ -89,7 +95,7 @@ vg.MouseCaster.prototype = {
 			// there isn't anything under the mouse
 			if (this.pickedObject) {
 				// there was though, we just moved out
-				this.signal.dispatch(vg.MouseCaster.OUT, this.pickedObject);
+				this.signal.dispatch(MouseCaster.OUT, this.pickedObject);
 			}
 			this.pickedObject = null;
 			this.selectedObject = null;
@@ -98,11 +104,11 @@ vg.MouseCaster.prototype = {
 		this.allHits = intersects;
 	},
 
-	preventDefault: function() {
+	preventDefault: function () {
 		this._preventDefault = true;
 	},
 
-	_onDocumentMouseDown: function(evt) {
+	_onDocumentMouseDown: function (evt) {
 		evt = evt || window.event;
 		evt.preventDefault();
 		if (this._preventDefault) {
@@ -118,10 +124,10 @@ vg.MouseCaster.prototype = {
 		this.down = evt.which === 1;
 		this.rightDown = evt.which === 3;
 
-		this.signal.dispatch(vg.MouseCaster.DOWN, this.pickedObject);
+		this.signal.dispatch(MouseCaster.DOWN, this.pickedObject);
 	},
 
-	_onDocumentMouseUp: function(evt) {
+	_onDocumentMouseUp: function (evt) {
 		evt.preventDefault();
 		if (this._preventDefault) {
 			this._preventDefault = false;
@@ -130,22 +136,22 @@ vg.MouseCaster.prototype = {
 		this.shift = evt.shiftKey;
 		this.ctrl = evt.ctrlKey;
 
-		this.signal.dispatch(vg.MouseCaster.UP, this.pickedObject);
+		this.signal.dispatch(MouseCaster.UP, this.pickedObject);
 		if (this.selectedObject && this.pickedObject && this.selectedObject.uniqueID === this.pickedObject.uniqueID) {
-			this.signal.dispatch(vg.MouseCaster.CLICK, this.pickedObject);
+			this.signal.dispatch(MouseCaster.CLICK, this.pickedObject);
 		}
 
 		this.down = evt.which === 1 ? false : this.down;
 		this.rightDown = evt.which === 3 ? false : this.rightDown;
 	},
 
-	_onDocumentMouseMove: function(evt) {
+	_onDocumentMouseMove: function (evt) {
 		evt.preventDefault();
 		this.screenPosition.x = (evt.clientX / window.innerWidth) * 2 - 1;
 		this.screenPosition.y = -(evt.clientY / window.innerHeight) * 2 + 1;
 	},
 
-	_onMouseWheel: function(evt) {
+	_onMouseWheel: function (evt) {
 		if (!this.active) {
 			return;
 		}
@@ -166,8 +172,10 @@ vg.MouseCaster.prototype = {
 			this.wheel--;
 		}
 		// console.log(this.wheel);
-		this.signal.dispatch(vg.MouseCaster.WHEEL, this.wheel);
+		this.signal.dispatch(MouseCaster.WHEEL, this.wheel);
 	}
 };
 
-vg.MouseCaster.prototype.constructor = vg.MouseCaster;
+MouseCaster.prototype.constructor = MouseCaster;
+
+export default MouseCaster;

@@ -5,7 +5,14 @@
 	Assumes full screen.
  */
 // 'utils/Tools'
-vg.Scene = function(sceneConfig, controlConfig) {
+import {
+	DirectionalLight, WebGLRenderer, Scene, AmbientLight,
+	OrthographicCamera, PerspectiveCamera, OrbitControls
+} from 'three';
+
+import Tools from './Tools';
+
+const VgScene = function (sceneConfig, controlConfig) {
 	var sceneSettings = {
 		element: document.body,
 		alpha: true,
@@ -13,7 +20,7 @@ vg.Scene = function(sceneConfig, controlConfig) {
 		clearColor: '#fff',
 		sortObjects: false,
 		fog: null,
-		light: new THREE.DirectionalLight(0xffffff),
+		light: new DirectionalLight(0xffffff),
 		lightPosition: null,
 		cameraType: 'PerspectiveCamera',
 		cameraPosition: null, // {x, y, z}
@@ -27,12 +34,12 @@ vg.Scene = function(sceneConfig, controlConfig) {
 		noZoom: false
 	};
 
-	sceneSettings = vg.Tools.merge(sceneSettings, sceneConfig);
+	sceneSettings = Tools.merge(sceneSettings, sceneConfig);
 	if (typeof controlConfig !== 'boolean') {
-		controlSettings = vg.Tools.merge(controlSettings, controlConfig);
+		controlSettings = Tools.merge(controlSettings, controlConfig);
 	}
 
-	this.renderer = new THREE.WebGLRenderer({
+	this.renderer = new WebGLRenderer({
 		alpha: sceneSettings.alpha,
 		antialias: sceneSettings.antialias
 	});
@@ -44,10 +51,10 @@ vg.Scene = function(sceneConfig, controlConfig) {
 
 	this.orthoZoom = sceneSettings.orthoZoom;
 
-	this.container = new THREE.Scene();
+	this.container = new Scene();
 	this.container.fog = sceneSettings.fog;
 
-	this.container.add(new THREE.AmbientLight(0xdddddd));
+	this.container.add(new AmbientLight(0xdddddd));
 
 	if (!sceneSettings.lightPosition) {
 		sceneSettings.light.position.set(-1, 1, -1).normalize();
@@ -57,15 +64,15 @@ vg.Scene = function(sceneConfig, controlConfig) {
 	if (sceneSettings.cameraType === 'OrthographicCamera') {
 		var width = window.innerWidth / this.orthoZoom;
 		var height = window.innerHeight / this.orthoZoom;
-		this.camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 5000);
+		this.camera = new OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, 5000);
 	}
 	else {
-		this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 1, 5000);
+		this.camera = new PerspectiveCamera(50, this.width / this.height, 1, 5000);
 	}
 
 	this.contolled = !!controlConfig;
 	if (this.contolled) {
-		this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 		this.controls.minDistance = controlSettings.minDistance;
 		this.controls.maxDistance = controlSettings.maxDistance;
 		this.controls.zoomSpeed = controlSettings.zoomSpeed;
@@ -97,9 +104,9 @@ vg.Scene = function(sceneConfig, controlConfig) {
 	this.attachTo(sceneSettings.element);
 };
 
-vg.Scene.prototype = {
+VgScene.prototype = {
 
-	attachTo: function(element) {
+	attachTo: function (element) {
 		element.style.width = this.width + 'px';
 		element.style.height = this.height + 'px';
 		this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -107,20 +114,20 @@ vg.Scene.prototype = {
 		element.appendChild(this.renderer.domElement);
 	},
 
-	add: function(mesh) {
+	add: function (mesh) {
 		this.container.add(mesh);
 	},
 
-	remove: function(mesh) {
+	remove: function (mesh) {
 		this.container.remove(mesh);
 	},
 
-	render: function() {
+	render: function () {
 		if (this.contolled) this.controls.update();
 		this.renderer.render(this.container, this.camera);
 	},
 
-	updateOrthoZoom: function() {
+	updateOrthoZoom: function () {
 		if (this.orthoZoom <= 0) {
 			this.orthoZoom = 0;
 			return;
@@ -134,9 +141,11 @@ vg.Scene.prototype = {
 		this.camera.updateProjectionMatrix();
 	},
 
-	focusOn: function(obj) {
+	focusOn: function (obj) {
 		this.camera.lookAt(obj.position);
 	}
 };
 
-vg.Scene.prototype.constructor = vg.Scene;
+VgScene.prototype.constructor = VgScene;
+
+export default VgScene;

@@ -1,9 +1,9 @@
 const tools = {
-	clamp: function(val, min, max) {
+	clamp: function (val, min, max) {
 		return Math.max(min, Math.min(max, val));
 	},
 
-	sign: function(val) {
+	sign: function (val) {
 		return val && val / Math.abs(val);
 	},
 
@@ -11,7 +11,7 @@ const tools = {
 	 * If one value is passed, it will return something from -val to val.
 	 * Else it returns a value between the range specified by min, max.
 	 */
-	random: function(min, max) {
+	random: function (min, max) {
 		if (arguments.length === 1) {
 			return (Math.random() * min) - (min * 0.5);
 		}
@@ -19,18 +19,18 @@ const tools = {
 	},
 
 	// from min to (and including) max
-	randomInt: function(min, max) {
+	randomInt: function (min, max) {
 		if (arguments.length === 1) {
 			return (Math.random() * min) - (min * 0.5) | 0;
 		}
 		return (Math.random() * (max - min + 1) + min) | 0;
 	},
 
-	normalize: function(v, min, max) {
+	normalize: function (v, min, max) {
 		return (v - min) / (max - min);
 	},
 
-	getShortRotation: function(angle) {
+	getShortRotation: function (angle) {
 		angle %= this.TAU;
 		if (angle > this.PI) {
 			angle -= this.TAU;
@@ -41,12 +41,12 @@ const tools = {
 		return angle;
 	},
 
-	generateID: function() {
+	generateID: function () {
 		return Math.random().toString(36).slice(2) + Date.now();
 	},
 
-	isPlainObject: function(obj) {
-		if (typeof(obj) !== 'object' || obj.nodeType || obj === obj.window) {
+	isPlainObject: function (obj) {
+		if (typeof (obj) !== 'object' || obj.nodeType || obj === obj.window) {
 			return false;
 		}
 		// The try/catch suppresses exceptions thrown when attempting to access the 'constructor' property of certain host objects, ie. |window.location|
@@ -65,13 +65,13 @@ const tools = {
 	},
 
 	// https://github.com/KyleAMathews/deepmerge/blob/master/index.js
-	merge: function(target, src) {
+	merge: function (target, src) {
 		var self = this, array = Array.isArray(src);
 		var dst = array && [] || {};
 		if (array) {
 			target = target || [];
 			dst = dst.concat(target);
-			src.forEach(function(e, i) {
+			src.forEach(function (e, i) {
 				if (typeof dst[i] === 'undefined') {
 					dst[i] = e;
 				}
@@ -107,11 +107,11 @@ const tools = {
 		return dst;
 	},
 
-	now: function() {
+	now: function () {
 		return window.nwf ? window.nwf.system.Performance.elapsedTime : window.performance.now();
 	},
 
-	empty: function(node) {
+	empty: function (node) {
 		while (node.lastChild) {
 			node.removeChild(node.lastChild);
 		}
@@ -120,7 +120,7 @@ const tools = {
 	/*
 		@source: http://jsperf.com/radix-sort
 	 */
-	radixSort: function(arr, idxBegin, idxEnd, bit) {
+	radixSort: function (arr, idxBegin, idxEnd, bit) {
 		idxBegin = idxBegin || 0;
 		idxEnd = idxEnd || arr.length;
 		bit = bit || 31;
@@ -141,11 +141,11 @@ const tools = {
 				++idx;
 			}
 		}
-		this.radixSort(arr, idxBegin, idxOnes, bit-1);
-		this.radixSort(arr, idxOnes, idxEnd, bit-1);
+		this.radixSort(arr, idxBegin, idxOnes, bit - 1);
+		this.radixSort(arr, idxOnes, idxEnd, bit - 1);
 	},
 
-	randomizeRGB: function(base, range) {
+	randomizeRGB: function (base, range) {
 		var rgb = base.split(',');
 		var color = 'rgb(';
 		var i, c;
@@ -156,16 +156,16 @@ const tools = {
 			else if (c > 255) c = 255;
 			color += c + ',';
 		}
-		color = color.substring(0, color.length-1);
+		color = color.substring(0, color.length - 1);
 		color += ')';
 		return color;
 	},
 
-	getJSON: function(config) {
+	getJSON: function (config) {
 		var xhr = new XMLHttpRequest();
 		var cache = typeof config.cache === 'undefined' ? false : config.cache;
 		var uri = cache ? config.url : config.url + '?t=' + Math.floor(Math.random() * 10000) + Date.now();
-		xhr.onreadystatechange = function() {
+		xhr.onreadystatechange = function () {
 			if (this.status === 200) {
 				var json = null;
 				try {
@@ -179,7 +179,7 @@ const tools = {
 				return;
 			}
 			else if (this.status !== 0) {
-				console.warn('[Tools.getJSON] Error: '+this.status+' ('+this.statusText+') :: '+config.url);
+				console.warn('[Tools.getJSON] Error: ' + this.status + ' (' + this.statusText + ') :: ' + config.url);
 			}
 		}
 		xhr.open('GET', uri, true);

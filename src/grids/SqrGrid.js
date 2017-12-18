@@ -14,12 +14,24 @@
 
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
  */
-vg.SqrGrid = function(config) {
+
+import {
+	Shape, Vector3, Geometry, ShapeGeometry, ExtrudeGeometry,
+	MeshPhongMaterial, MeshBasicMaterial, Mesh, Line
+} from 'three';
+
+import { DEG_TO_RAD, PI, SQR } from '../constants';
+import Tools from '../utils/Tools';
+
+import Cell from './Cell';
+import Tile from './Tile';
+
+const SqrGrid = function (config) {
 	config = config || {};
 	/*  ______________________________________________
 		GRID INTERFACE:
 	*/
-	this.type = vg.SQR;
+	this.type = SQR;
 	this.size = 5; // only used for generated maps
 	this.cellSize = typeof config.cellSize === 'undefined' ? 10 : config.cellSize;
 	this.cells = {};
@@ -30,23 +42,23 @@ vg.SqrGrid = function(config) {
 
 	// create base shape used for building geometry
 	var verts = [];
-	verts.push(new THREE.Vector3());
-	verts.push(new THREE.Vector3(-this.cellSize, this.cellSize));
-	verts.push(new THREE.Vector3(this.cellSize, this.cellSize));
-	verts.push(new THREE.Vector3(this.cellSize, -this.cellSize));
+	verts.push(new Vector3());
+	verts.push(new Vector3(-this.cellSize, this.cellSize));
+	verts.push(new Vector3(this.cellSize, this.cellSize));
+	verts.push(new Vector3(this.cellSize, -this.cellSize));
 	// copy the verts into a shape for the geometry to use
-	this.cellShape = new THREE.Shape();
+	this.cellShape = new Shape();
 	this.cellShape.moveTo(-this.cellSize, -this.cellSize);
 	this.cellShape.lineTo(-this.cellSize, this.cellSize);
 	this.cellShape.lineTo(this.cellSize, this.cellSize);
 	this.cellShape.lineTo(this.cellSize, -this.cellSize);
 	this.cellShape.lineTo(-this.cellSize, -this.cellSize);
 
-	this.cellGeo = new THREE.Geometry();
+	this.cellGeo = new Geometry();
 	this.cellGeo.vertices = verts;
 	this.cellGeo.verticesNeedUpdate = true;
 
-	this.cellShapeGeo = new THREE.ShapeGeometry(this.cellShape);
+	this.cellShapeGeo = new ShapeGeometry(this.cellShape);
 
 	/*  ______________________________________________
 		PRIVATE
@@ -55,46 +67,46 @@ vg.SqrGrid = function(config) {
 	this._fullCellSize = this.cellSize * 2;
 	this._hashDelimeter = '.';
 	// pre-computed permutations
-	this._directions = [new vg.Cell(+1, 0, 0), new vg.Cell(0, -1, 0),
-						new vg.Cell(-1, 0, 0), new vg.Cell(0, +1, 0)];
-	this._diagonals = [new vg.Cell(-1, -1, 0), new vg.Cell(-1, +1, 0),
-					   new vg.Cell(+1, +1, 0), new vg.Cell(+1, -1, 0)];
+	this._directions = [new Cell(+1, 0, 0), new Cell(0, -1, 0),
+	new Cell(-1, 0, 0), new Cell(0, +1, 0)];
+	this._diagonals = [new Cell(-1, -1, 0), new Cell(-1, +1, 0),
+	new Cell(+1, +1, 0), new Cell(+1, -1, 0)];
 	// cached objects
 	this._list = [];
-	this._vec3 = new THREE.Vector3();
-	this._cel = new vg.Cell();
-	this._conversionVec = new THREE.Vector3();
+	this._vec3 = new Vector3();
+	this._cel = new Cell();
+	this._conversionVec = new Vector3();
 	this._geoCache = [];
 	this._matCache = [];
 };
 
-vg.SqrGrid.prototype = {
+SqrGrid.prototype = {
 	/*
 		________________________________________________________________________
 		High-level functions that the Board interfaces with (all grids implement)
 	 */
 
-	cellToPixel: function(cell) {
+	cellToPixel: function (cell) {
 		this._vec3.x = cell.q * this._fullCellSize;
 		this._vec3.y = cell.h;
 		this._vec3.z = cell.r * this._fullCellSize;
 		return this._vec3;
 	},
 
-	pixelToCell: function(pos) {
+	pixelToCell: function (pos) {
 		var q = Math.round(pos.x / this._fullCellSize);
 		var r = Math.round(pos.z / this._fullCellSize);
 		return this._cel.set(q, r, 0);
 	},
 
-	getCellAt: function(pos) {
+	getCellAt: function (pos) {
 		var q = Math.round(pos.x / this._fullCellSize);
 		var r = Math.round(pos.z / this._fullCellSize);
 		this._cel.set(q, r);
 		return this.cells[this.cellToHash(this._cel)];
 	},
 
-	getNeighbors: function(cell, diagonal, filter) {
+	getNeighbors: function (cell, diagonal, filter) {
 		// always returns an array
 		var i, n, l = this._directions.length;
 		this._list.length = 0;
@@ -121,8 +133,8 @@ vg.SqrGrid.prototype = {
 		return this._list;
 	},
 
-	getRandomCell: function() {
-		var c, i = 0, x = vg.Tools.randomInt(0, this.numCells);
+	getRandomCell: function () {
+		var c, i = 0, x = Tools.randomInt(0, this.numCells);
 		for (c in this.cells) {
 			if (i === x) {
 				return this.cells[c];
@@ -132,17 +144,17 @@ vg.SqrGrid.prototype = {
 		return this.cells[c];
 	},
 
-	cellToHash: function(cell) {
-		return cell.q+this._hashDelimeter+cell.r; // s is not used in a square grid
+	cellToHash: function (cell) {
+		return cell.q + this._hashDelimeter + cell.r; // s is not used in a square grid
 	},
 
-	distance: function(cellA, cellB) {
+	distance: function (cellA, cellB) {
 		var d = Math.max(Math.abs(cellA.q - cellB.q), Math.abs(cellA.r - cellB.r));
 		d += cellB.h - cellA.h; // include vertical size
 		return d;
 	},
 
-	clearPath: function() {
+	clearPath: function () {
 		var i, c;
 		for (i in this.cells) {
 			c = this.cells[i];
@@ -153,21 +165,21 @@ vg.SqrGrid.prototype = {
 		}
 	},
 
-	traverse: function(cb) {
+	traverse: function (cb) {
 		var i;
 		for (i in this.cells) {
 			cb(this.cells[i]);
 		}
 	},
 
-	generateTile: function(cell, scale, material) {
+	generateTile: function (cell, scale, material) {
 		var height = Math.abs(cell.h);
 		if (height < 1) height = 1;
 
 		var geo = this._geoCache[height];
 		if (!geo) {
 			this.extrudeSettings.amount = height;
-			geo = new THREE.ExtrudeGeometry(this.cellShape, this.extrudeSettings);
+			geo = new ExtrudeGeometry(this.cellShape, this.extrudeSettings);
 			this._geoCache[height] = geo;
 		}
 
@@ -179,7 +191,7 @@ vg.SqrGrid.prototype = {
 			this._matCache[c.matConfig.mat_cache_id] = mat;
 		}*/
 
-		var t = new vg.Tile({
+		var t = new Tile({
 			size: this.cellSize,
 			scale: scale,
 			cell: cell,
@@ -192,7 +204,7 @@ vg.SqrGrid.prototype = {
 		return t;
 	},
 
-	generateTiles: function(config) {
+	generateTiles: function (config) {
 		config = config || {};
 		var tiles = [];
 		var settings = {
@@ -208,11 +220,11 @@ vg.SqrGrid.prototype = {
 				bevelThickness: 0.5
 			}
 		}
-		settings = vg.Tools.merge(settings, config);
+		settings = Tools.merge(settings, config);
 
 		/*if (!settings.material) {
-			settings.material = new THREE.MeshPhongMaterial({
-				color: vg.Tools.randomizeRGB('30, 30, 30', 10)
+			settings.material = new MeshPhongMaterial({
+				color: Tools.randomizeRGB('30, 30, 30', 10)
 			});
 		}*/
 
@@ -234,45 +246,45 @@ vg.SqrGrid.prototype = {
 		return tiles;
 	},
 
-	generateTilePoly: function(material) {
+	generateTilePoly: function (material) {
 		if (!material) {
-			material = new THREE.MeshBasicMaterial({color: 0x24b4ff});
+			material = new MeshBasicMaterial({ color: 0x24b4ff });
 		}
-		var mesh = new THREE.Mesh(this.cellShapeGeo, material);
+		var mesh = new Mesh(this.cellShapeGeo, material);
 		this._vec3.set(1, 0, 0);
-		mesh.rotateOnAxis(this._vec3, vg.PI/2);
+		mesh.rotateOnAxis(this._vec3, PI / 2);
 		return mesh;
 	},
 
 	// create a flat, square-shaped grid
-	generate: function(config) {
+	generate: function (config) {
 		config = config || {};
 		this.size = typeof config.size === 'undefined' ? this.size : config.size;
 		var x, y, c;
 		var half = Math.ceil(this.size / 2);
 		for (x = -half; x < half; x++) {
 			for (y = -half; y < half; y++) {
-				c = new vg.Cell(x, y + 1);
+				c = new Cell(x, y + 1);
 				this.add(c);
 			}
 		}
 	},
 
-	generateOverlay: function(size, overlayObj, overlayMat) {
+	generateOverlay: function (size, overlayObj, overlayMat) {
 		var x, y;
 		var half = Math.ceil(size / 2);
 		for (x = -half; x < half; x++) {
 			for (y = -half; y < half; y++) {
 				this._cel.set(x, y); // define the cell
-				var line = new THREE.Line(this.cellGeo, overlayMat);
+				var line = new Line(this.cellGeo, overlayMat);
 				line.position.copy(this.cellToPixel(this._cel));
-				line.rotation.x = 90 * vg.DEG_TO_RAD;
+				line.rotation.x = 90 * DEG_TO_RAD;
 				overlayObj.add(line);
 			}
 		}
 	},
 
-	add: function(cell) {
+	add: function (cell) {
 		var h = this.cellToHash(cell);
 		if (this.cells[h]) {
 			// console.warn('A cell already exists there');
@@ -284,7 +296,7 @@ vg.SqrGrid.prototype = {
 		return cell;
 	},
 
-	remove: function(cell) {
+	remove: function (cell) {
 		var h = this.cellToHash(cell);
 		if (this.cells[h]) {
 			delete this.cells[h];
@@ -292,7 +304,7 @@ vg.SqrGrid.prototype = {
 		}
 	},
 
-	dispose: function() {
+	dispose: function () {
 		this.cells = null;
 		this.numCells = 0;
 		this.cellShape = null;
@@ -329,10 +341,10 @@ vg.SqrGrid.prototype = {
 			]
 		}
 	*/
-	load: function(url, callback, scope) {
-		vg.Tools.getJSON({
+	load: function (url, callback, scope) {
+		Tools.getJSON({
 			url: url,
-			callback: function(json) {
+			callback: function (json) {
 				this.fromJSON(json);
 				callback.call(scope || null, json);
 			},
@@ -341,7 +353,7 @@ vg.SqrGrid.prototype = {
 		});
 	},
 
-	fromJSON: function(json) {
+	fromJSON: function (json) {
 		var i, c;
 		var cells = json.cells;
 
@@ -355,13 +367,13 @@ vg.SqrGrid.prototype = {
 		this.autogenerated = json.autogenerated;
 
 		for (i = 0; i < cells.length; i++) {
-			c = new vg.Cell();
+			c = new Cell();
 			c.copy(cells[i]);
 			this.add(c);
 		}
 	},
 
-	toJSON: function() {
+	toJSON: function () {
 		var json = {
 			size: this.size,
 			cellSize: this.cellSize,
@@ -388,4 +400,4 @@ vg.SqrGrid.prototype = {
 	}
 };
 
-vg.SqrGrid.prototype.constructor = vg.SqrGrid;
+SqrGrid.prototype.constructor = SqrGrid;

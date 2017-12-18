@@ -4,6 +4,10 @@
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
 */
 
+import {
+	Mesh, MeshPhongMaterial
+} from 'three';
+
 import { DEG_TO_RAD, TILE } from '../constants';
 import Tools from '../utils/Tools';
 
@@ -29,7 +33,7 @@ const Tile = function (config) {
 	this.geometry = settings.geometry;
 	this.material = settings.material;
 	if (!this.material) {
-		this.material = new THREE.MeshPhongMaterial({
+		this.material = new MeshPhongMaterial({
 			color: Tools.randomizeRGB('30, 30, 30', 13)
 		});
 	}
@@ -41,7 +45,7 @@ const Tile = function (config) {
 	this.selected = false;
 	this.highlight = '0x0084cc';
 
-	this.mesh = new THREE.Mesh(this.geometry, this.material);
+	this.mesh = new Mesh(this.geometry, this.material);
 	this.mesh.userData.structure = this;
 
 	// create references so we can control orientation through this (Tile), instead of drilling down
