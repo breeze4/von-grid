@@ -401,3 +401,5 @@ SqrGrid.prototype = {
 };
 
 SqrGrid.prototype.constructor = SqrGrid;
+
+export default SqrGrid;

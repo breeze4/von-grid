@@ -1,4 +1,5 @@
-import { HexGrid, SqrGrid } from './grids';
+import HexGrid from './grids/HexGrid';
+import SqrGrid from './grids/SqrGrid';
 
 import Scene from './utils/Scene';
 

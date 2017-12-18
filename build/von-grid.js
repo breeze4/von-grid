@@ -45915,9 +45915,11 @@ Tile.prototype.constructor = Tile;
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__grids__ = __webpack_require__(7);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_Scene__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Board__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__grids_HexGrid__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__grids_SqrGrid__ = __webpack_require__(8);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Scene__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Board__ = __webpack_require__(11);
+
 
 
 
@@ -45925,27 +45927,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 var vg = { // eslint-disable-line
-	HexGrid: __WEBPACK_IMPORTED_MODULE_0__grids__["a" /* HexGrid */], SqrGrid: __WEBPACK_IMPORTED_MODULE_0__grids__["b" /* SqrGrid */], Scene: __WEBPACK_IMPORTED_MODULE_1__utils_Scene__["a" /* default */], Board: __WEBPACK_IMPORTED_MODULE_2__Board__["a" /* default */]
+	HexGrid: __WEBPACK_IMPORTED_MODULE_0__grids_HexGrid__["a" /* default */], SqrGrid: __WEBPACK_IMPORTED_MODULE_1__grids_SqrGrid__["a" /* default */], Scene: __WEBPACK_IMPORTED_MODULE_2__utils_Scene__["a" /* default */], Board: __WEBPACK_IMPORTED_MODULE_3__Board__["a" /* default */]
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (vg);
 
 /***/ }),
 /* 7 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__HexGrid__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__SqrGrid__ = __webpack_require__(9);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__HexGrid__["default"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_1__SqrGrid__["default"]; });
-
-
-
-
-
-/***/ }),
-/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46448,9 +46436,10 @@ HexGrid.prototype = {
 
 HexGrid.prototype.constructor = HexGrid;
 
+/* harmony default export */ __webpack_exports__["a"] = (HexGrid);
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -46860,14 +46849,15 @@ SqrGrid.prototype = {
 
 SqrGrid.prototype.constructor = SqrGrid;
 
+/* harmony default export */ __webpack_exports__["a"] = (SqrGrid);
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls__ = __webpack_require__(10);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_three_orbit_controls__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Tools__ = __webpack_require__(1);
 /*
@@ -47024,7 +47014,7 @@ VgScene.prototype.constructor = VgScene;
 /* harmony default export */ __webpack_exports__["a"] = (VgScene);
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports) {
 
 module.exports = function( THREE ) {
@@ -48050,13 +48040,13 @@ module.exports = function( THREE ) {
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pathing_AStarFinder__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Loader__ = __webpack_require__(15);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pathing_AStarFinder__ = __webpack_require__(12);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Loader__ = __webpack_require__(14);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_Tools__ = __webpack_require__(1);
 /*
 	Interface to the grid. Holds data about the visual representation of the cells (tiles).
@@ -48224,13 +48214,13 @@ Board.prototype.constructor = Board;
 /* harmony default export */ __webpack_exports__["a"] = (Board);
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Tools__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_LinkedList__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__PathUtil__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__PathUtil__ = __webpack_require__(13);
 /*
 	A* path-finder based upon http://www.redblobgames.com/pathfinding/a-star/introduction.html
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
@@ -48332,7 +48322,7 @@ AStarFinder.prototype.constructor = AStarFinder;
 /* harmony default export */ __webpack_exports__["a"] = (AStarFinder);
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -48581,7 +48571,7 @@ const PathUtil = {
 /* harmony default export */ __webpack_exports__["a"] = (PathUtil);
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";

@@ -494,3 +494,5 @@ HexGrid.prototype = {
 };
 
 HexGrid.prototype.constructor = HexGrid;
+
+export default HexGrid;
