@@ -15,11 +15,11 @@ const config = {
   // We'll be using the latter form given it's
   // convenient with more complex configurations.
   entry: {
-    app: PATHS.src
+    'von-grid': PATHS.src
   },
   output: {
     path: PATHS.build,
-    filename: '[name].js' //.[hash]
+    filename: '[name].js'
   },
   plugins: [
   ],
