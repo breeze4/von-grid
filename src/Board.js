@@ -7,9 +7,9 @@ import {
 	Object3D, LineBasicMaterial
 } from 'three';
 
-import AStarFinder from '../pathing/AStarFinder';
-import Loader from '../utils/Loader';
-import Tools from '../utils/Tools';
+import AStarFinder from './pathing/AStarFinder';
+import Loader from './utils/Loader';
+import Tools from './utils/Tools';
 
 const Board = function(grid, finderConfig) {
 	if (!grid) throw new Error('You must pass in a grid system for the board to use.');
@@ -162,3 +162,5 @@ Board.prototype = {
 };
 
 Board.prototype.constructor = Board;
+
+export default Board;

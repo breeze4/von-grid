@@ -5,10 +5,14 @@
 	Assumes full screen.
  */
 // 'utils/Tools'
+import * as THREE from 'three';
 import {
 	DirectionalLight, WebGLRenderer, Scene, AmbientLight,
-	OrthographicCamera, PerspectiveCamera, OrbitControls
+	OrthographicCamera, PerspectiveCamera
 } from 'three';
+
+import OrbitControlsSetup from 'three-orbit-controls';
+const OrbitControls = OrbitControlsSetup(THREE);
 
 import Tools from './Tools';
 
