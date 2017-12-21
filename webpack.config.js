@@ -14,20 +14,14 @@ const config = {
   // Entry accepts a path or an object of entries.
   // We'll be using the latter form given it's
   // convenient with more complex configurations.
-  entry: {
-    'von-grid': PATHS.src
-  },
+  entry: PATHS.src,
   output: {
     path: PATHS.build,
-    filename: '[name].js'
+    filename: 'von-grid.js',
+    library: 'vonGrid',
+    libraryTarget: 'umd'
   },
-  plugins: [
-  ],
-  resolve: {
-    extensions: ['.js'],
-    alias: {
-    }
-  }
+  externals: ['three', 'three-orbit-controls']
 };
 
 module.exports = config;

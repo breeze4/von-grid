@@ -4,6 +4,7 @@
   "repository": "https://github.com/vonWolfehaus/hex-grid",
   "license": "MIT",
   "main": "build/von-grid.js",
+  "module": "src/index.js",
   "devDependencies": {
     "browser-sync": "^2.2.3",
     "del": "^2.0.2",
@@ -29,8 +30,9 @@
     "webpack": "^3.10.0"
   },
   "dependencies": {
+  },
+  "peerDependencies": {
     "three": "^0.88.0",
     "three-orbit-controls": "^82.1.0"
-  },
-  "peerDependencies": {}
+  }
 }
