@@ -8,11 +8,11 @@
 import * as THREE from 'three';
 import {
 	DirectionalLight, WebGLRenderer, Scene, AmbientLight,
-	OrthographicCamera, PerspectiveCamera
+	OrthographicCamera, PerspectiveCamera, OrbitControls
 } from 'three';
 
-import OrbitControlsSetup from 'three-orbit-controls';
-const OrbitControls = OrbitControlsSetup(THREE);
+// import OrbitControlsSetup from 'three-orbit-controls';
+// const OrbitControls = OrbitControlsSetup(THREE);
 
 import Tools from './Tools';
 
@@ -83,7 +83,6 @@ const VgScene = function (sceneConfig, controlConfig) {
 		this.controls.minDistance = controlSettings.minDistance;
 		this.controls.maxDistance = controlSettings.maxDistance;
 		this.controls.zoomSpeed = controlSettings.zoomSpeed;
-		this.controls.noZoom = controlSettings.noZoom;
 		this.controls.enableZoom = controlSettings.enableZoom;
 		this.controls.enableRotate = controlSettings.enableRotate;
 		this.controls.enablePan = controlSettings.enablePan;

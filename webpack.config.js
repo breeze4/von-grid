@@ -21,7 +21,7 @@ const config = {
     library: 'vonGrid',
     libraryTarget: 'umd'
   },
-  externals: ['three', 'three-orbit-controls']
+  externals: ['three']
 };
 
 module.exports = config;

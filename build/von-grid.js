@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory(require("three"));
+	else if(typeof define === 'function' && define.amd)
+		define(["three"], factory);
+	else if(typeof exports === 'object')
+		exports["vonGrid"] = factory(require("three"));
+	else
+		root["vonGrid"] = factory(root["three"]);
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__) {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -67,7 +77,7 @@
 /* 0 */
 /***/ (function(module, exports) {
 
-module.exports = three;
+module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 
 /***/ }),
 /* 1 */
@@ -863,7 +873,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__grids_HexGrid__ = __webpack_require__(7);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__grids_SqrGrid__ = __webpack_require__(8);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Scene__ = __webpack_require__(9);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Board__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__Board__ = __webpack_require__(10);
 
 
 
@@ -1805,9 +1815,7 @@ SqrGrid.prototype.constructor = SqrGrid;
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_three__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls__ = __webpack_require__(10);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_three_orbit_controls__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Tools__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Tools__ = __webpack_require__(1);
 /*
 	Sets up and manages a THREEjs container, camera, and light, making it easy to get going.
 	Also provides camera control.
@@ -1818,8 +1826,8 @@ SqrGrid.prototype.constructor = SqrGrid;
 
 
 
-
-const OrbitControls = __WEBPACK_IMPORTED_MODULE_1_three_orbit_controls___default()(__WEBPACK_IMPORTED_MODULE_0_three__);
+// import OrbitControlsSetup from 'three-orbit-controls';
+// const OrbitControls = OrbitControlsSetup(THREE);
 
 
 
@@ -1842,12 +1850,15 @@ const VgScene = function (sceneConfig, controlConfig) {
 		minDistance: 100,
 		maxDistance: 1000,
 		zoomSpeed: 2,
-		noZoom: false
+		noZoom: false,
+		enableZoom: true,
+		enableRotate: true,
+		enablePan: true
 	};
 
-	sceneSettings = __WEBPACK_IMPORTED_MODULE_2__Tools__["a" /* default */].merge(sceneSettings, sceneConfig);
+	sceneSettings = __WEBPACK_IMPORTED_MODULE_1__Tools__["a" /* default */].merge(sceneSettings, sceneConfig);
 	if (typeof controlConfig !== 'boolean') {
-		controlSettings = __WEBPACK_IMPORTED_MODULE_2__Tools__["a" /* default */].merge(controlSettings, controlConfig);
+		controlSettings = __WEBPACK_IMPORTED_MODULE_1__Tools__["a" /* default */].merge(controlSettings, controlConfig);
 	}
 
 	this.renderer = new __WEBPACK_IMPORTED_MODULE_0_three__["WebGLRenderer"]({
@@ -1883,11 +1894,13 @@ const VgScene = function (sceneConfig, controlConfig) {
 
 	this.contolled = !!controlConfig;
 	if (this.contolled) {
-		this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+		this.controls = new __WEBPACK_IMPORTED_MODULE_0_three__["OrbitControls"](this.camera, this.renderer.domElement);
 		this.controls.minDistance = controlSettings.minDistance;
 		this.controls.maxDistance = controlSettings.maxDistance;
 		this.controls.zoomSpeed = controlSettings.zoomSpeed;
-		this.controls.noZoom = controlSettings.noZoom;
+		this.controls.enableZoom = controlSettings.enableZoom;
+		this.controls.enableRotate = controlSettings.enableRotate;
+		this.controls.enablePan = controlSettings.enablePan;
 	}
 
 	if (sceneSettings.cameraPosition) {
@@ -1963,19 +1976,13 @@ VgScene.prototype.constructor = VgScene;
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports) {
-
-module.exports = three-orbit-controls;
-
-/***/ }),
-/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_three___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_three__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pathing_AStarFinder__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Loader__ = __webpack_require__(14);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__pathing_AStarFinder__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__utils_Loader__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__utils_Tools__ = __webpack_require__(1);
 /*
 	Interface to the grid. Holds data about the visual representation of the cells (tiles).
@@ -2143,13 +2150,13 @@ Board.prototype.constructor = Board;
 /* harmony default export */ __webpack_exports__["a"] = (Board);
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_Tools__ = __webpack_require__(1);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__lib_LinkedList__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__PathUtil__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__PathUtil__ = __webpack_require__(12);
 /*
 	A* path-finder based upon http://www.redblobgames.com/pathfinding/a-star/introduction.html
 	@author Corey Birnbaum https://github.com/vonWolfehaus/
@@ -2251,7 +2258,7 @@ AStarFinder.prototype.constructor = AStarFinder;
 /* harmony default export */ __webpack_exports__["a"] = (AStarFinder);
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2500,7 +2507,7 @@ const PathUtil = {
 /* harmony default export */ __webpack_exports__["a"] = (PathUtil);
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2550,3 +2557,4 @@ const Loader = {
 
 /***/ })
 /******/ ]);
+});
