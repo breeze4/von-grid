@@ -35,7 +35,10 @@ const VgScene = function (sceneConfig, controlConfig) {
 		minDistance: 100,
 		maxDistance: 1000,
 		zoomSpeed: 2,
-		noZoom: false
+		noZoom: false,
+		enableZoom: true,
+		enableRotate: true,
+		enablePan: true
 	};
 
 	sceneSettings = Tools.merge(sceneSettings, sceneConfig);
@@ -81,6 +84,9 @@ const VgScene = function (sceneConfig, controlConfig) {
 		this.controls.maxDistance = controlSettings.maxDistance;
 		this.controls.zoomSpeed = controlSettings.zoomSpeed;
 		this.controls.noZoom = controlSettings.noZoom;
+		this.controls.enableZoom = controlSettings.enableZoom;
+		this.controls.enableRotate = controlSettings.enableRotate;
+		this.controls.enablePan = controlSettings.enablePan;
 	}
 
 	if (sceneSettings.cameraPosition) {
